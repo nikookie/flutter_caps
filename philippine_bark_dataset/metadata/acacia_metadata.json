@@ -1,0 +1,357 @@
+{
+  "species_key": "acacia",
+  "common_name": "Acacia",
+  "download_date": "2025-09-30T14:04:56.038354",
+  "images": [
+    {
+      "filename": "acacia_317694274_574100444.jpg",
+      "observation_id": 317694274,
+      "photo_id": 574100444,
+      "source_url": "https://inaturalist-open-data.s3.amazonaws.com/photos/574100444/large.jpg",
+      "search_term": "Acacia"
+    },
+    {
+      "filename": "acacia_317580788_573877578.jpg",
+      "observation_id": 317580788,
+      "photo_id": 573877578,
+      "source_url": "https://static.inaturalist.org/photos/573877578/large.jpg",
+      "search_term": "Acacia"
+    },
+    {
+      "filename": "acacia_317573725_573863876.jpg",
+      "observation_id": 317573725,
+      "photo_id": 573863876,
+      "source_url": "https://inaturalist-open-data.s3.amazonaws.com/photos/573863876/large.jpg",
+      "search_term": "Acacia"
+    },
+    {
+      "filename": "acacia_317573725_573863940.jpg",
+      "observation_id": 317573725,
+      "photo_id": 573863940,
+      "source_url": "https://inaturalist-open-data.s3.amazonaws.com/photos/573863940/large.jpg",
+      "search_term": "Acacia"
+    },
+    {
+      "filename": "acacia_317573725_573863976.jpg",
+      "observation_id": 317573725,
+      "photo_id": 573863976,
+      "source_url": "https://inaturalist-open-data.s3.amazonaws.com/photos/573863976/large.jpg",
+      "search_term": "Acacia"
+    },
+    {
+      "filename": "acacia_317573065_573862524.jpg",
+      "observation_id": 317573065,
+      "photo_id": 573862524,
+      "source_url": "https://inaturalist-open-data.s3.amazonaws.com/photos/573862524/large.jpg",
+      "search_term": "Acacia"
+    },
+    {
+      "filename": "acacia_317573065_573862560.jpg",
+      "observation_id": 317573065,
+      "photo_id": 573862560,
+      "source_url": "https://inaturalist-open-data.s3.amazonaws.com/photos/573862560/large.jpg",
+      "search_term": "Acacia"
+    },
+    {
+      "filename": "acacia_317573065_573862597.jpg",
+      "observation_id": 317573065,
+      "photo_id": 573862597,
+      "source_url": "https://inaturalist-open-data.s3.amazonaws.com/photos/573862597/large.jpg",
+      "search_term": "Acacia"
+    },
+    {
+      "filename": "acacia_317452321_573634318.jpg",
+      "observation_id": 317452321,
+      "photo_id": 573634318,
+      "source_url": "https://inaturalist-open-data.s3.amazonaws.com/photos/573634318/large.jpg",
+      "search_term": "Acacia"
+    },
+    {
+      "filename": "acacia_317452321_573634375.jpg",
+      "observation_id": 317452321,
+      "photo_id": 573634375,
+      "source_url": "https://inaturalist-open-data.s3.amazonaws.com/photos/573634375/large.jpg",
+      "search_term": "Acacia"
+    },
+    {
+      "filename": "acacia_317452321_573634414.jpg",
+      "observation_id": 317452321,
+      "photo_id": 573634414,
+      "source_url": "https://inaturalist-open-data.s3.amazonaws.com/photos/573634414/large.jpg",
+      "search_term": "Acacia"
+    },
+    {
+      "filename": "acacia_317318267_573374610.jpg",
+      "observation_id": 317318267,
+      "photo_id": 573374610,
+      "source_url": "https://inaturalist-open-data.s3.amazonaws.com/photos/573374610/large.jpg",
+      "search_term": "Acacia"
+    },
+    {
+      "filename": "acacia_317318267_573376647.jpg",
+      "observation_id": 317318267,
+      "photo_id": 573376647,
+      "source_url": "https://inaturalist-open-data.s3.amazonaws.com/photos/573376647/large.jpg",
+      "search_term": "Acacia"
+    },
+    {
+      "filename": "acacia_317284207_573313108.jpg",
+      "observation_id": 317284207,
+      "photo_id": 573313108,
+      "source_url": "https://inaturalist-open-data.s3.amazonaws.com/photos/573313108/large.jpg",
+      "search_term": "Acacia"
+    },
+    {
+      "filename": "acacia_317247603_573245680.jpg",
+      "observation_id": 317247603,
+      "photo_id": 573245680,
+      "source_url": "https://inaturalist-open-data.s3.amazonaws.com/photos/573245680/large.jpg",
+      "search_term": "Acacia"
+    },
+    {
+      "filename": "acacia_317247603_573245746.jpg",
+      "observation_id": 317247603,
+      "photo_id": 573245746,
+      "source_url": "https://inaturalist-open-data.s3.amazonaws.com/photos/573245746/large.jpg",
+      "search_term": "Acacia"
+    },
+    {
+      "filename": "acacia_317244000_573232331.jpg",
+      "observation_id": 317244000,
+      "photo_id": 573232331,
+      "source_url": "https://inaturalist-open-data.s3.amazonaws.com/photos/573232331/large.jpg",
+      "search_term": "Acacia"
+    },
+    {
+      "filename": "acacia_317183512_573127084.jpg",
+      "observation_id": 317183512,
+      "photo_id": 573127084,
+      "source_url": "https://inaturalist-open-data.s3.amazonaws.com/photos/573127084/large.jpg",
+      "search_term": "Acacia"
+    },
+    {
+      "filename": "acacia_317007470_572790161.jpg",
+      "observation_id": 317007470,
+      "photo_id": 572790161,
+      "source_url": "https://inaturalist-open-data.s3.amazonaws.com/photos/572790161/large.jpg",
+      "search_term": "Acacia"
+    },
+    {
+      "filename": "acacia_317007470_572790193.jpg",
+      "observation_id": 317007470,
+      "photo_id": 572790193,
+      "source_url": "https://inaturalist-open-data.s3.amazonaws.com/photos/572790193/large.jpg",
+      "search_term": "Acacia"
+    },
+    {
+      "filename": "acacia_316973791_572730507.jpg",
+      "observation_id": 316973791,
+      "photo_id": 572730507,
+      "source_url": "https://inaturalist-open-data.s3.amazonaws.com/photos/572730507/large.jpg",
+      "search_term": "Acacia"
+    },
+    {
+      "filename": "acacia_316968714_572724043.jpg",
+      "observation_id": 316968714,
+      "photo_id": 572724043,
+      "source_url": "https://inaturalist-open-data.s3.amazonaws.com/photos/572724043/large.jpg",
+      "search_term": "Acacia"
+    },
+    {
+      "filename": "acacia_316968714_572724114.jpg",
+      "observation_id": 316968714,
+      "photo_id": 572724114,
+      "source_url": "https://inaturalist-open-data.s3.amazonaws.com/photos/572724114/large.jpg",
+      "search_term": "Acacia"
+    },
+    {
+      "filename": "acacia_316966777_572690025.jpg",
+      "observation_id": 316966777,
+      "photo_id": 572690025,
+      "source_url": "https://inaturalist-open-data.s3.amazonaws.com/photos/572690025/large.jpg",
+      "search_term": "Acacia"
+    },
+    {
+      "filename": "acacia_316946132_572681788.jpg",
+      "observation_id": 316946132,
+      "photo_id": 572681788,
+      "source_url": "https://inaturalist-open-data.s3.amazonaws.com/photos/572681788/large.jpg",
+      "search_term": "Acacia"
+    },
+    {
+      "filename": "acacia_316946132_572681819.jpg",
+      "observation_id": 316946132,
+      "photo_id": 572681819,
+      "source_url": "https://inaturalist-open-data.s3.amazonaws.com/photos/572681819/large.jpg",
+      "search_term": "Acacia"
+    },
+    {
+      "filename": "acacia_316946132_572681851.jpg",
+      "observation_id": 316946132,
+      "photo_id": 572681851,
+      "source_url": "https://inaturalist-open-data.s3.amazonaws.com/photos/572681851/large.jpg",
+      "search_term": "Acacia"
+    },
+    {
+      "filename": "acacia_316934285_572660328.jpg",
+      "observation_id": 316934285,
+      "photo_id": 572660328,
+      "source_url": "https://inaturalist-open-data.s3.amazonaws.com/photos/572660328/large.jpg",
+      "search_term": "Acacia"
+    },
+    {
+      "filename": "acacia_316934285_572660354.jpg",
+      "observation_id": 316934285,
+      "photo_id": 572660354,
+      "source_url": "https://inaturalist-open-data.s3.amazonaws.com/photos/572660354/large.jpg",
+      "search_term": "Acacia"
+    },
+    {
+      "filename": "acacia_316934285_572660377.jpg",
+      "observation_id": 316934285,
+      "photo_id": 572660377,
+      "source_url": "https://inaturalist-open-data.s3.amazonaws.com/photos/572660377/large.jpg",
+      "search_term": "Acacia"
+    },
+    {
+      "filename": "acacia_316925838_572645165.jpg",
+      "observation_id": 316925838,
+      "photo_id": 572645165,
+      "source_url": "https://static.inaturalist.org/photos/572645165/large.jpg",
+      "search_term": "Acacia"
+    },
+    {
+      "filename": "acacia_316916297_572625218.jpg",
+      "observation_id": 316916297,
+      "photo_id": 572625218,
+      "source_url": "https://static.inaturalist.org/photos/572625218/large.jpg",
+      "search_term": "Acacia"
+    },
+    {
+      "filename": "acacia_316916297_572625217.jpg",
+      "observation_id": 316916297,
+      "photo_id": 572625217,
+      "source_url": "https://static.inaturalist.org/photos/572625217/large.jpg",
+      "search_term": "Acacia"
+    },
+    {
+      "filename": "acacia_316916297_572625219.jpg",
+      "observation_id": 316916297,
+      "photo_id": 572625219,
+      "source_url": "https://static.inaturalist.org/photos/572625219/large.jpg",
+      "search_term": "Acacia"
+    },
+    {
+      "filename": "acacia_316571879_571973920.jpg",
+      "observation_id": 316571879,
+      "photo_id": 571973920,
+      "source_url": "https://inaturalist-open-data.s3.amazonaws.com/photos/571973920/large.jpg",
+      "search_term": "Acacia"
+    },
+    {
+      "filename": "acacia_316564435_571946484.jpg",
+      "observation_id": 316564435,
+      "photo_id": 571946484,
+      "source_url": "https://inaturalist-open-data.s3.amazonaws.com/photos/571946484/large.jpg",
+      "search_term": "Acacia"
+    },
+    {
+      "filename": "acacia_316564435_571946509.jpg",
+      "observation_id": 316564435,
+      "photo_id": 571946509,
+      "source_url": "https://inaturalist-open-data.s3.amazonaws.com/photos/571946509/large.jpg",
+      "search_term": "Acacia"
+    },
+    {
+      "filename": "acacia_316564435_571946555.jpg",
+      "observation_id": 316564435,
+      "photo_id": 571946555,
+      "source_url": "https://inaturalist-open-data.s3.amazonaws.com/photos/571946555/large.jpg",
+      "search_term": "Acacia"
+    },
+    {
+      "filename": "acacia_316564435_571946587.jpg",
+      "observation_id": 316564435,
+      "photo_id": 571946587,
+      "source_url": "https://inaturalist-open-data.s3.amazonaws.com/photos/571946587/large.jpg",
+      "search_term": "Acacia"
+    },
+    {
+      "filename": "acacia_316564435_571946476.jpg",
+      "observation_id": 316564435,
+      "photo_id": 571946476,
+      "source_url": "https://inaturalist-open-data.s3.amazonaws.com/photos/571946476/large.jpg",
+      "search_term": "Acacia"
+    },
+    {
+      "filename": "acacia_316561620_571949803.jpg",
+      "observation_id": 316561620,
+      "photo_id": 571949803,
+      "source_url": "https://inaturalist-open-data.s3.amazonaws.com/photos/571949803/large.jpg",
+      "search_term": "Acacia"
+    },
+    {
+      "filename": "acacia_316561620_571949792.jpg",
+      "observation_id": 316561620,
+      "photo_id": 571949792,
+      "source_url": "https://inaturalist-open-data.s3.amazonaws.com/photos/571949792/large.jpg",
+      "search_term": "Acacia"
+    },
+    {
+      "filename": "acacia_316561620_571949875.jpg",
+      "observation_id": 316561620,
+      "photo_id": 571949875,
+      "source_url": "https://inaturalist-open-data.s3.amazonaws.com/photos/571949875/large.jpg",
+      "search_term": "Acacia"
+    },
+    {
+      "filename": "acacia_316561620_571949906.jpg",
+      "observation_id": 316561620,
+      "photo_id": 571949906,
+      "source_url": "https://inaturalist-open-data.s3.amazonaws.com/photos/571949906/large.jpg",
+      "search_term": "Acacia"
+    },
+    {
+      "filename": "acacia_316561620_571949889.jpg",
+      "observation_id": 316561620,
+      "photo_id": 571949889,
+      "source_url": "https://inaturalist-open-data.s3.amazonaws.com/photos/571949889/large.jpg",
+      "search_term": "Acacia"
+    },
+    {
+      "filename": "acacia_316452722_571750719.jpg",
+      "observation_id": 316452722,
+      "photo_id": 571750719,
+      "source_url": "https://inaturalist-open-data.s3.amazonaws.com/photos/571750719/large.jpg",
+      "search_term": "Acacia"
+    },
+    {
+      "filename": "acacia_316327915_571511814.jpg",
+      "observation_id": 316327915,
+      "photo_id": 571511814,
+      "source_url": "https://inaturalist-open-data.s3.amazonaws.com/photos/571511814/large.jpg",
+      "search_term": "Acacia"
+    },
+    {
+      "filename": "acacia_316244310_571360967.jpg",
+      "observation_id": 316244310,
+      "photo_id": 571360967,
+      "source_url": "https://inaturalist-open-data.s3.amazonaws.com/photos/571360967/large.jpg",
+      "search_term": "Acacia"
+    },
+    {
+      "filename": "acacia_316244310_571394732.jpg",
+      "observation_id": 316244310,
+      "photo_id": 571394732,
+      "source_url": "https://inaturalist-open-data.s3.amazonaws.com/photos/571394732/large.jpg",
+      "search_term": "Acacia"
+    },
+    {
+      "filename": "acacia_316157263_571187876.jpg",
+      "observation_id": 316157263,
+      "photo_id": 571187876,
+      "source_url": "https://inaturalist-open-data.s3.amazonaws.com/photos/571187876/large.jpg",
+      "search_term": "Acacia"
+    }
+  ]
+}

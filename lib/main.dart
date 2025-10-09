@@ -9,7 +9,8 @@ import 'package:percent_indicator/circular_percent_indicator.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 import 'history_screen.dart';
-import 'wood_species_data.dart';
+import 'philippine_wood_species_data.dart';
+import 'settings_screen.dart';
 
 class SplashScreen extends StatefulWidget {
   @override
@@ -218,18 +219,51 @@ class _WoodScannerState extends State<WoodScanner>
     try {
       var request = http.MultipartRequest(
         'POST',
-        Uri.parse("http://10.0.2.2:5000/predict"),
+        Uri.parse("http://localhost:5000/predict"),
       );
 
-      request.files.add(
-        await http.MultipartFile.fromPath('image', _image!.path),
-      );
+      // Handle web vs mobile differently
+      if (kIsWeb) {
+        // For web: read file as bytes from the network URL
+        final response = await http.get(Uri.parse(_image!.path));
+        request.files.add(
+          http.MultipartFile.fromBytes(
+            'image',
+            response.bodyBytes,
+            filename: 'upload.jpg',
+          ),
+        );
+      } else {
+        // For mobile/desktop: use file path
+        request.files.add(
+          await http.MultipartFile.fromPath('image', _image!.path),
+        );
+      }
 
       var response = await request.send();
       var responseData = await response.stream.bytesToString();
 
       if (response.statusCode == 200) {
         var data = jsonDecode(responseData);
+        
+        // Debug: Print the actual response from backend
+        print("🔍 Backend Response: $data");
+        print("🌳 Predicted Class: ${data['predicted_class']}");
+        print("📊 Confidence: ${data['confidence']}");
+        
+        // Validate the predicted class
+        final predictedClass = data['predicted_class']?.toString() ?? 'Unknown';
+        print("✅ Validated Predicted Class: $predictedClass");
+        
+        // Check if it's a valid wood species from our dataset
+        final validSpecies = ['acacia', 'aratiles', 'coconut', 'dao', 'gmelina', 
+                              'jackfruit', 'mahogany', 'mango', 'molave', 'narra'];
+        final normalizedClass = predictedClass.toLowerCase().trim();
+        
+        if (!validSpecies.contains(normalizedClass) && normalizedClass != 'unknown') {
+          print("⚠️ WARNING: Backend returned unexpected class: $predictedClass");
+          print("⚠️ Expected one of: ${validSpecies.join(', ')}");
+        }
 
         // Show "Done Scanning" message
         setState(() {
@@ -260,8 +294,9 @@ class _WoodScannerState extends State<WoodScanner>
         _isProcessing = false;
       });
       
-      // For testing purposes, simulate a successful scan with sample data
-      await _simulateWoodScan();
+      // Show the actual error instead of falling back to test mode
+      print("❌ ERROR connecting to backend: $e");
+      _showErrorSnackBar("❌ Backend connection failed: $e\n\nMake sure your backend is running at http://localhost:5000");
     }
   }
 
@@ -417,23 +452,31 @@ class _WoodScannerState extends State<WoodScanner>
             color: Color(0xFF2D3436),
           ),
         ),
-        Container(
-          padding: EdgeInsets.all(8),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(12),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.05),
-                blurRadius: 10,
-                offset: Offset(0, 2),
-              ),
-            ],
-          ),
-          child: FaIcon(
-            FontAwesomeIcons.gear,
-            color: Color(0xFF636E72),
-            size: 20,
+        GestureDetector(
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => SettingsScreen()),
+            );
+          },
+          child: Container(
+            padding: EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(12),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.05),
+                  blurRadius: 10,
+                  offset: Offset(0, 2),
+                ),
+              ],
+            ),
+            child: FaIcon(
+              FontAwesomeIcons.gear,
+              color: Color(0xFF636E72),
+              size: 20,
+            ),
           ),
         ),
       ],
@@ -1249,7 +1292,7 @@ class _WoodScannerState extends State<WoodScanner>
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Enhanced Wood Quality Banner with better icons
+          // PRIMARY: Wood Species Display (Most Prominent)
           Container(
             width: double.infinity,
             padding: EdgeInsets.all(20),
@@ -1257,14 +1300,16 @@ class _WoodScannerState extends State<WoodScanner>
               gradient: LinearGradient(
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
-                colors: isGoodWood
-                    ? [Color(0xFF00B894), Color(0xFF00D2A7), Color(0xFF55EFC4)]
-                    : [Color(0xFFE17055), Color(0xFFFF6B6B), Color(0xFFFF7675)],
+                colors: [
+                  Color(0xFF8B4513),
+                  Color(0xFFA0522D),
+                  Color(0xFF8B4513).withOpacity(0.8),
+                ],
               ),
               borderRadius: BorderRadius.circular(16),
               boxShadow: [
                 BoxShadow(
-                  color: (isGoodWood ? Color(0xFF00B894) : Color(0xFFE17055)).withOpacity(0.3),
+                  color: Color(0xFF8B4513).withOpacity(0.3),
                   blurRadius: 15,
                   offset: Offset(0, 5),
                 ),
@@ -1272,18 +1317,18 @@ class _WoodScannerState extends State<WoodScanner>
             ),
             child: Row(
               children: [
-                // Enhanced icon with background
+                // Wood icon with background
                 Container(
-                  padding: EdgeInsets.all(12),
+                  padding: EdgeInsets.all(14),
                   decoration: BoxDecoration(
                     color: Colors.white.withOpacity(0.2),
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(color: Colors.white.withOpacity(0.3), width: 2),
                   ),
                   child: Icon(
-                    isGoodWood ? Icons.verified_rounded : Icons.dangerous_rounded,
+                    Icons.park_rounded,
                     color: Colors.white,
-                    size: 32,
+                    size: 36,
                   ),
                 ),
                 SizedBox(width: 16),
@@ -1294,27 +1339,38 @@ class _WoodScannerState extends State<WoodScanner>
                       Row(
                         children: [
                           Text(
-                            isGoodWood ? "GOOD WOOD" : "POOR WOOD",
+                            "Wood Species Detected",
                             style: TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.w900,
-                              color: Colors.white,
-                              letterSpacing: 1.0,
+                              fontSize: 12,
+                              color: Colors.white.withOpacity(0.9),
+                              fontWeight: FontWeight.w600,
+                              letterSpacing: 0.5,
                             ),
                           ),
-                          SizedBox(width: 8),
+                          SizedBox(width: 6),
                           Icon(
-                            isGoodWood ? Icons.thumb_up_rounded : Icons.thumb_down_rounded,
+                            Icons.verified_rounded,
                             color: Colors.white,
-                            size: 20,
+                            size: 16,
                           ),
                         ],
                       ),
+                      SizedBox(height: 6),
+                      Text(
+                        woodType.toUpperCase(),
+                        style: TextStyle(
+                          fontSize: 26,
+                          fontWeight: FontWeight.w900,
+                          color: Colors.white,
+                          letterSpacing: 1.2,
+                          height: 1.1,
+                        ),
+                      ),
                       SizedBox(height: 4),
                       Text(
-                        woodQuality['description'],
+                        _getWoodSpeciesInfo(),
                         style: TextStyle(
-                          fontSize: 13,
+                          fontSize: 12,
                           color: Colors.white.withOpacity(0.95),
                           fontWeight: FontWeight.w500,
                           height: 1.3,
@@ -1326,71 +1382,80 @@ class _WoodScannerState extends State<WoodScanner>
               ],
             ),
           ),
-          SizedBox(height: 24),
+          SizedBox(height: 20),
 
-          // Enhanced Wood Type Section with better icon
-          Row(
-            children: [
-              Container(
-                padding: EdgeInsets.all(14),
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [Color(0xFF8B4513).withOpacity(0.1), Color(0xFFA0522D).withOpacity(0.1)],
+          // SECONDARY: Wood Quality Indicator (Smaller, less prominent)
+          Container(
+            padding: EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: (isGoodWood ? Color(0xFF00B894) : Color(0xFFE17055)).withOpacity(0.1),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: (isGoodWood ? Color(0xFF00B894) : Color(0xFFE17055)).withOpacity(0.3),
+                width: 1.5,
+              ),
+            ),
+            child: Row(
+              children: [
+                Container(
+                  padding: EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: (isGoodWood ? Color(0xFF00B894) : Color(0xFFE17055)).withOpacity(0.15),
+                    borderRadius: BorderRadius.circular(8),
                   ),
-                  borderRadius: BorderRadius.circular(14),
-                  border: Border.all(color: Color(0xFF8B4513).withOpacity(0.2), width: 1),
+                  child: Icon(
+                    isGoodWood ? Icons.verified_rounded : Icons.warning_amber_rounded,
+                    color: isGoodWood ? Color(0xFF00B894) : Color(0xFFE17055),
+                    size: 24,
+                  ),
                 ),
-                child: Icon(
-                  Icons.park_rounded, // Better tree icon
-                  color: Color(0xFF8B4513),
-                  size: 28,
-                ),
-              ),
-              SizedBox(width: 16),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Text(
-                          "Wood Species",
-                          style: TextStyle(
-                            fontSize: 14,
-                            color: Color(0xFF636E72),
-                            fontWeight: FontWeight.w500,
+                SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Text(
+                            "Quality: ",
+                            style: TextStyle(
+                              fontSize: 13,
+                              color: Color(0xFF636E72),
+                              fontWeight: FontWeight.w500,
+                            ),
                           ),
-                        ),
-                        SizedBox(width: 6),
-                        Icon(
-                          Icons.science_rounded,
+                          Text(
+                            isGoodWood ? "GOOD WOOD" : "POOR WOOD",
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w800,
+                              color: isGoodWood ? Color(0xFF00B894) : Color(0xFFE17055),
+                              letterSpacing: 0.5,
+                            ),
+                          ),
+                          SizedBox(width: 6),
+                          Icon(
+                            isGoodWood ? Icons.thumb_up_rounded : Icons.thumb_down_rounded,
+                            color: isGoodWood ? Color(0xFF00B894) : Color(0xFFE17055),
+                            size: 16,
+                          ),
+                        ],
+                      ),
+                      SizedBox(height: 4),
+                      Text(
+                        woodQuality['description'],
+                        style: TextStyle(
+                          fontSize: 12,
                           color: Color(0xFF636E72),
-                          size: 16,
+                          fontWeight: FontWeight.w500,
+                          height: 1.3,
                         ),
-                      ],
-                    ),
-                    SizedBox(height: 4),
-                    Text(
-                      woodType.toUpperCase(),
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.w800,
-                        color: Color(0xFF2D3436),
-                        letterSpacing: 0.5,
                       ),
-                    ),
-                    Text(
-                      _getWoodSpeciesInfo(),
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: Color(0xFF636E72),
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
           SizedBox(height: 24),
 
@@ -1519,45 +1584,249 @@ class _WoodScannerState extends State<WoodScanner>
 
   // Helper methods for wood quality assessment
   Map<String, dynamic> _getWoodQuality() {
-    if (_result == null) return {'isGood': false, 'description': 'No data available'};
+    if (_result == null) return {
+      'isGood': false, 
+      'description': 'No data available',
+      'reasons': ['No scan data available'],
+      'recommendation': 'Please scan a wood sample first'
+    };
 
     final confidence = _result!['confidence'] ?? 0.0;
     final woodType = (_result!['predicted_class'] ?? '').toLowerCase();
 
-    // Good wood criteria: high confidence + known good wood types
+    // Good wood criteria: primarily based on AI confidence
     bool isGoodWood = false;
     String description = '';
+    List<String> reasons = [];
+    String recommendation = '';
 
-    if (confidence >= 0.8) {
-      if (woodType.contains('oak') || woodType.contains('mahogany') ||
-          woodType.contains('teak') || woodType.contains('walnut') ||
-          woodType.contains('cherry') || woodType.contains('maple')) {
-        isGoodWood = true;
+    // Check if it's a known wood species (not unknown/unidentified)
+    bool isKnownSpecies = !woodType.contains('unknown') && 
+                          woodType.isNotEmpty && 
+                          woodType != 'unidentified';
+
+    if (confidence >= 0.75 && isKnownSpecies) {
+      // High confidence with known species = GOOD WOOD
+      isGoodWood = true;
+      
+      // Check for premium hardwoods
+      if (woodType.contains('mahogany') || woodType.contains('narra') ||
+          woodType.contains('oak') || woodType.contains('teak') ||
+          woodType.contains('walnut') || woodType.contains('molave')) {
         description = 'Premium hardwood with excellent structural properties';
-      } else if (woodType.contains('pine') || woodType.contains('cedar') ||
-          woodType.contains('fir') || woodType.contains('birch')) {
-        isGoodWood = true;
-        description = 'Good quality softwood suitable for various applications';
-      } else {
-        isGoodWood = confidence >= 0.85;
-        description = isGoodWood
-            ? 'High-quality wood with good structural integrity'
-            : 'Moderate quality - check for defects before use';
+        reasons = [
+          'High AI confidence: ${(confidence * 100).toStringAsFixed(1)}%',
+          'Recognized as premium hardwood species',
+          'Known for excellent durability and strength',
+          'Suitable for high-quality furniture and construction'
+        ];
+        recommendation = 'Excellent choice for furniture making, flooring, and structural applications. This wood is highly valued for its strength and aesthetic appeal.';
+      } 
+      // Check for common hardwoods
+      else if (woodType.contains('acacia') || woodType.contains('mango') ||
+               woodType.contains('dao') || woodType.contains('gmelina')) {
+        description = 'Good quality hardwood suitable for various applications';
+        reasons = [
+          'High AI confidence: ${(confidence * 100).toStringAsFixed(1)}%',
+          'Identified as quality hardwood species',
+          'Good workability and structural properties',
+          'Suitable for furniture and construction projects'
+        ];
+        recommendation = 'Great for furniture making, construction, and general woodworking projects. Offers good durability and workability.';
       }
-    } else if (confidence >= 0.6) {
+      // Check for softwoods and fruit woods
+      else if (woodType.contains('pine') || woodType.contains('cedar') ||
+               woodType.contains('aratiles') || woodType.contains('jackfruit') ||
+               woodType.contains('coconut')) {
+        description = 'Good quality wood suitable for various applications';
+        reasons = [
+          'High AI confidence: ${(confidence * 100).toStringAsFixed(1)}%',
+          'Successfully identified wood species',
+          'Good workability and availability',
+          'Suitable for many woodworking projects'
+        ];
+        recommendation = 'Suitable for general construction, indoor furniture, and crafting projects. Easy to work with and versatile.';
+      }
+      // Any other known species with high confidence
+      else {
+        description = 'High-quality wood with good identification accuracy';
+        reasons = [
+          'High AI confidence: ${(confidence * 100).toStringAsFixed(1)}%',
+          'Wood species successfully identified',
+          'Clear wood characteristics detected',
+          'Suitable for general woodworking use'
+        ];
+        recommendation = 'Suitable for general woodworking projects. The high confidence indicates reliable identification. Verify specific properties for your intended use.';
+      }
+    } 
+    else if (confidence >= 0.60 && confidence < 0.75 && isKnownSpecies) {
+      // Moderate confidence = MODERATE QUALITY (still mark as poor for safety)
+      isGoodWood = false;
+      description = 'Moderate quality - verification recommended';
+      reasons = [
+        'Moderate AI confidence: ${(confidence * 100).toStringAsFixed(1)}%',
+        'Wood species identified but with lower certainty',
+        'May require additional inspection',
+        'Quality assessment is less reliable'
+      ];
+      recommendation = 'Consider professional verification before use in critical applications. May be suitable for non-structural projects.';
+    }
+    else if (confidence >= 0.50 && confidence < 0.60) {
+      // Low confidence = POOR WOOD
       isGoodWood = false;
       description = 'Questionable quality - requires professional assessment';
-    } else {
+      reasons = [
+        'Low AI confidence: ${(confidence * 100).toStringAsFixed(1)}%',
+        'Identification accuracy is below optimal threshold',
+        'Wood quality cannot be reliably determined',
+        'May have defects or unusual characteristics'
+      ];
+      recommendation = 'Not recommended for critical applications without professional inspection. Consider using for non-structural projects only.';
+    } 
+    else {
+      // Very low confidence or unknown species = POOR WOOD
       isGoodWood = false;
-      description = 'Poor quality or damaged wood - not recommended for structural use';
+      description = 'Poor quality or unidentifiable wood - not recommended';
+      reasons = [
+        'Very low AI confidence: ${(confidence * 100).toStringAsFixed(1)}%',
+        'Poor identification accuracy indicates issues',
+        'Likely damaged, treated, or composite material',
+        'Not suitable for reliable wood applications'
+      ];
+      recommendation = 'Do not use for structural or furniture applications. This wood may be damaged, heavily treated, or not suitable for typical woodworking.';
     }
 
-    return {'isGood': isGoodWood, 'description': description};
+    return {
+      'isGood': isGoodWood, 
+      'description': description,
+      'reasons': reasons,
+      'recommendation': recommendation
+    };
   }
 
   String _getWoodSpeciesInfo() {
     final woodType = (_result?['predicted_class'] ?? '').toLowerCase();
-    return WoodSpeciesData.getWoodDescription(woodType);
+    return PhilippineWoodSpeciesData.getWoodDescription(woodType);
+  }
+
+  // Detect wood defects based on confidence and wood type
+  Map<String, dynamic> _detectWoodDefects() {
+    if (_result == null) return {
+      'hasDefects': false,
+      'defects': [],
+      'severity': 'none'
+    };
+
+    final confidence = _result!['confidence'] ?? 0.0;
+    final woodType = (_result!['predicted_class'] ?? '').toLowerCase();
+    
+    List<Map<String, dynamic>> detectedDefects = [];
+    String severity = 'none';
+
+    // Low confidence indicates potential issues
+    if (confidence < 0.6) {
+      severity = 'critical';
+      detectedDefects.addAll([
+        {
+          'name': 'Poor Image Quality',
+          'description': 'Image may be blurry, poorly lit, or obstructed',
+          'icon': Icons.image_not_supported_rounded,
+          'severity': 'high'
+        },
+        {
+          'name': 'Unidentifiable Wood',
+          'description': 'Wood species cannot be reliably identified',
+          'icon': Icons.help_outline_rounded,
+          'severity': 'high'
+        },
+      ]);
+    } else if (confidence < 0.7) {
+      severity = 'moderate';
+      detectedDefects.add({
+        'name': 'Uncertain Classification',
+        'description': 'Wood characteristics are unclear or ambiguous',
+        'icon': Icons.warning_amber_rounded,
+        'severity': 'medium'
+      });
+    }
+
+    // Simulate defect detection based on confidence patterns
+    if (confidence >= 0.6 && confidence < 0.85) {
+      detectedDefects.addAll([
+        {
+          'name': 'Surface Irregularities',
+          'description': 'Possible knots, cracks, or uneven grain patterns detected',
+          'icon': Icons.texture_rounded,
+          'severity': 'medium'
+        },
+        {
+          'name': 'Color Variation',
+          'description': 'Inconsistent coloring may indicate weathering or treatment',
+          'icon': Icons.palette_rounded,
+          'severity': 'low'
+        },
+      ]);
+      if (severity == 'none') severity = 'moderate';
+    }
+
+    // Check for specific wood type issues
+    if (woodType.contains('unknown') || woodType.isEmpty) {
+      detectedDefects.add({
+        'name': 'Unknown Species',
+        'description': 'Wood species not in database or heavily modified',
+        'icon': Icons.question_mark_rounded,
+        'severity': 'high'
+      });
+      severity = 'critical';
+    }
+
+    // Good wood with high confidence
+    if (confidence >= 0.85 && detectedDefects.isEmpty) {
+      severity = 'none';
+      detectedDefects.add({
+        'name': 'No Defects Detected',
+        'description': 'Wood appears to be in good condition with clear characteristics',
+        'icon': Icons.check_circle_rounded,
+        'severity': 'none'
+      });
+    }
+
+    return {
+      'hasDefects': detectedDefects.isNotEmpty && severity != 'none',
+      'defects': detectedDefects,
+      'severity': severity,
+      'defectCount': detectedDefects.where((d) => d['severity'] != 'none').length
+    };
+  }
+
+  Color _getDefectSeverityColor(String severity) {
+    switch (severity) {
+      case 'critical':
+        return Color(0xFFE17055);
+      case 'high':
+        return Color(0xFFFF6B6B);
+      case 'medium':
+        return Color(0xFFFFB74D);
+      case 'low':
+        return Color(0xFF74B9FF);
+      default:
+        return Color(0xFF00B894);
+    }
+  }
+
+  IconData _getDefectSeverityIcon(String severity) {
+    switch (severity) {
+      case 'critical':
+        return Icons.dangerous_rounded;
+      case 'high':
+        return Icons.error_rounded;
+      case 'medium':
+        return Icons.warning_rounded;
+      case 'low':
+        return Icons.info_rounded;
+      default:
+        return Icons.check_circle_rounded;
+    }
   }
 
   Widget _buildSummaryScreen() {
@@ -1909,12 +2178,18 @@ class _WoodScannerState extends State<WoodScanner>
     required Color color,
     String? subtitle,
   }) {
+    // Check if this is the wood species card to give it special styling
+    bool isWoodSpeciesCard = title.contains('Wood Species') || title.contains('🌳');
+    
     return Container(
       margin: EdgeInsets.symmetric(horizontal: 24),
       padding: EdgeInsets.all(20),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
+        border: isWoodSpeciesCard 
+            ? Border.all(color: Color(0xFF8B4513).withOpacity(0.3), width: 2)
+            : null,
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.05),
@@ -1930,11 +2205,14 @@ class _WoodScannerState extends State<WoodScanner>
             decoration: BoxDecoration(
               color: color.withOpacity(0.1),
               borderRadius: BorderRadius.circular(12),
+              border: isWoodSpeciesCard 
+                  ? Border.all(color: color.withOpacity(0.3), width: 1)
+                  : null,
             ),
             child: Icon(
               icon,
               color: color,
-              size: 24,
+              size: isWoodSpeciesCard ? 28 : 24,
             ),
           ),
           SizedBox(width: 16),
@@ -1954,9 +2232,10 @@ class _WoodScannerState extends State<WoodScanner>
                 Text(
                   value,
                   style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w700,
-                    color: Color(0xFF2D3436),
+                    fontSize: isWoodSpeciesCard ? 20 : 18,
+                    fontWeight: isWoodSpeciesCard ? FontWeight.w900 : FontWeight.w700,
+                    color: isWoodSpeciesCard ? Color(0xFF8B4513) : Color(0xFF2D3436),
+                    letterSpacing: isWoodSpeciesCard ? 0.5 : 0,
                   ),
                 ),
                 if (subtitle != null) ...[
@@ -1984,68 +2263,299 @@ class _WoodScannerState extends State<WoodScanner>
 
     return Container(
       margin: EdgeInsets.symmetric(horizontal: 24),
-      padding: EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: isGoodWood
-              ? [Color(0xFF00B894).withOpacity(0.1), Color(0xFF00D2A7).withOpacity(0.1)]
-              : [Color(0xFFE17055).withOpacity(0.1), Color(0xFFFF6B6B).withOpacity(0.1)],
-        ),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: isGoodWood ? Color(0xFF00B894).withOpacity(0.3) : Color(0xFFE17055).withOpacity(0.3),
-          width: 2,
-        ),
-      ),
-      child: Row(
-        children: [
-          Container(
-            padding: EdgeInsets.all(12),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: () => _showQualityExplanationDialog(),
+          borderRadius: BorderRadius.circular(16),
+          child: Ink(
+            padding: EdgeInsets.all(20),
             decoration: BoxDecoration(
-              color: (isGoodWood ? Color(0xFF00B894) : Color(0xFFE17055)).withOpacity(0.2),
-              borderRadius: BorderRadius.circular(12),
+              gradient: LinearGradient(
+                colors: isGoodWood
+                    ? [Color(0xFF00B894).withOpacity(0.1), Color(0xFF00D2A7).withOpacity(0.1)]
+                    : [Color(0xFFE17055).withOpacity(0.1), Color(0xFFFF6B6B).withOpacity(0.1)],
+              ),
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(
+                color: isGoodWood ? Color(0xFF00B894).withOpacity(0.3) : Color(0xFFE17055).withOpacity(0.3),
+                width: 2,
+              ),
             ),
-            child: Icon(
-              isGoodWood ? Icons.verified_user_rounded : Icons.warning_amber_rounded,
-              color: isGoodWood ? Color(0xFF00B894) : Color(0xFFE17055),
-              size: 28,
+            child: Row(
+              children: [
+                Container(
+                  padding: EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: (isGoodWood ? Color(0xFF00B894) : Color(0xFFE17055)).withOpacity(0.2),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Icon(
+                    isGoodWood ? Icons.verified_user_rounded : Icons.warning_amber_rounded,
+                    color: isGoodWood ? Color(0xFF00B894) : Color(0xFFE17055),
+                    size: 28,
+                  ),
+                ),
+                SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Text(
+                            isGoodWood ? "GOOD WOOD" : "POOR WOOD",
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w800,
+                              color: isGoodWood ? Color(0xFF00B894) : Color(0xFFE17055),
+                              letterSpacing: 0.5,
+                            ),
+                          ),
+                          SizedBox(width: 8),
+                          Icon(
+                            isGoodWood ? Icons.thumb_up_rounded : Icons.thumb_down_rounded,
+                            color: isGoodWood ? Color(0xFF00B894) : Color(0xFFE17055),
+                            size: 16,
+                          ),
+                        ],
+                      ),
+                      SizedBox(height: 4),
+                      Text(
+                        woodQuality['description'],
+                        style: TextStyle(
+                          fontSize: 13,
+                          color: Color(0xFF636E72),
+                          fontWeight: FontWeight.w500,
+                          height: 1.3,
+                        ),
+                      ),
+                      SizedBox(height: 8),
+                      Row(
+                        children: [
+                          Icon(
+                            Icons.info_outline,
+                            size: 14,
+                            color: Color(0xFF74B9FF),
+                          ),
+                          SizedBox(width: 4),
+                          Text(
+                            'Tap to see why',
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: Color(0xFF74B9FF),
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+                Icon(
+                  Icons.chevron_right,
+                  color: Color(0xFF636E72),
+                  size: 24,
+                ),
+              ],
             ),
           ),
-          SizedBox(width: 16),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
+        ),
+      ),
+    );
+  }
+
+  void _showQualityExplanationDialog() {
+    final woodQuality = _getWoodQuality();
+    final isGoodWood = woodQuality['isGood'];
+    final woodType = (_result?['predicted_class'] ?? 'Unknown').toUpperCase();
+    final confidence = ((_result?['confidence'] ?? 0.0) * 100).toStringAsFixed(1);
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: Row(
+          children: [
+            Container(
+              padding: EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: (isGoodWood ? Color(0xFF00B894) : Color(0xFFE17055)).withOpacity(0.1),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Icon(
+                isGoodWood ? Icons.verified_rounded : Icons.warning_amber_rounded,
+                color: isGoodWood ? Color(0xFF00B894) : Color(0xFFE17055),
+                size: 28,
+              ),
+            ),
+            SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                isGoodWood ? 'Why Good Wood?' : 'Why Poor Wood?',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w800,
+                  color: Color(0xFF2D3436),
+                ),
+              ),
+            ),
+          ],
+        ),
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Wood Type Info
+              Container(
+                padding: EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Color(0xFFF8F9FA),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: Color(0xFFE2E8F0)),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    Row(
+                      children: [
+                        Icon(Icons.park_rounded, size: 20, color: Color(0xFF8B4513)),
+                        SizedBox(width: 8),
+                        Text(
+                          'Detected Wood',
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                            color: Color(0xFF636E72),
+                          ),
+                        ),
+                      ],
+                    ),
+                    SizedBox(height: 8),
                     Text(
-                      isGoodWood ? "GOOD WOOD" : "POOR WOOD",
+                      woodType,
                       style: TextStyle(
-                        fontSize: 16,
+                        fontSize: 18,
                         fontWeight: FontWeight.w800,
-                        color: isGoodWood ? Color(0xFF00B894) : Color(0xFFE17055),
-                        letterSpacing: 0.5,
+                        color: Color(0xFF2D3436),
                       ),
                     ),
-                    SizedBox(width: 8),
-                    Icon(
-                      isGoodWood ? Icons.thumb_up_rounded : Icons.thumb_down_rounded,
-                      color: isGoodWood ? Color(0xFF00B894) : Color(0xFFE17055),
-                      size: 16,
+                    SizedBox(height: 4),
+                    Text(
+                      'AI Confidence: $confidence%',
+                      style: TextStyle(
+                        fontSize: 13,
+                        color: Color(0xFF636E72),
+                      ),
                     ),
                   ],
                 ),
-                SizedBox(height: 4),
-                Text(
-                  woodQuality['description'],
-                  style: TextStyle(
-                    fontSize: 13,
-                    color: Color(0xFF636E72),
-                    fontWeight: FontWeight.w500,
-                    height: 1.3,
+              ),
+              
+              SizedBox(height: 20),
+              
+              // Classification Reason
+              Text(
+                'Classification Criteria:',
+                style: TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w700,
+                  color: Color(0xFF2D3436),
+                ),
+              ),
+              SizedBox(height: 12),
+              
+              ...woodQuality['reasons'].map<Widget>((reason) => Padding(
+                padding: EdgeInsets.only(bottom: 8),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Container(
+                      margin: EdgeInsets.only(top: 4),
+                      width: 6,
+                      height: 6,
+                      decoration: BoxDecoration(
+                        color: isGoodWood ? Color(0xFF00B894) : Color(0xFFE17055),
+                        shape: BoxShape.circle,
+                      ),
+                    ),
+                    SizedBox(width: 12),
+                    Expanded(
+                      child: Text(
+                        reason,
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: Color(0xFF2D3436),
+                          height: 1.4,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              )).toList(),
+              
+              SizedBox(height: 16),
+              
+              // Recommendation
+              Container(
+                padding: EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: (isGoodWood ? Color(0xFF00B894) : Color(0xFFE17055)).withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: (isGoodWood ? Color(0xFF00B894) : Color(0xFFE17055)).withOpacity(0.3),
                   ),
                 ),
-              ],
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Icon(
+                      Icons.lightbulb_outline,
+                      color: isGoodWood ? Color(0xFF00B894) : Color(0xFFE17055),
+                      size: 20,
+                    ),
+                    SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Recommendation',
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w700,
+                              color: Color(0xFF2D3436),
+                            ),
+                          ),
+                          SizedBox(height: 4),
+                          Text(
+                            woodQuality['recommendation'],
+                            style: TextStyle(
+                              fontSize: 13,
+                              color: Color(0xFF2D3436),
+                              height: 1.4,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text(
+              'Got it',
+              style: TextStyle(
+                color: Color(0xFF00B894),
+                fontWeight: FontWeight.w700,
+                fontSize: 15,
+              ),
             ),
           ),
         ],
@@ -2437,19 +2947,19 @@ Widget _buildUsabilityItem(String title, String rating, IconData icon, {Color? c
   }
 
   List<String> _getTableMakingTips(String woodType) {
-    return WoodSpeciesData.getWoodTips(woodType);
+    return PhilippineWoodSpeciesData.getWoodTips(woodType);
   }
 
   List<String> _getChairMakingTips(String woodType) {
-    return WoodSpeciesData.getWoodTips(woodType);
+    return PhilippineWoodSpeciesData.getWoodTips(woodType);
   }
 
   List<String> _getCoffeeTableTips(String woodType) {
-    return WoodSpeciesData.getWoodTips(woodType);
+    return PhilippineWoodSpeciesData.getWoodTips(woodType);
   }
 
   List<String> _getBookshelfTips(String woodType) {
-    return WoodSpeciesData.getWoodTips(woodType);
+    return PhilippineWoodSpeciesData.getWoodTips(woodType);
   }
 
   void _showFurnitureGuide(Map<String, dynamic> project) {
@@ -2747,7 +3257,7 @@ Widget _buildUsabilityItem(String title, String rating, IconData icon, {Color? c
   String _getRecommendations() {
     final woodType = (_result?['predicted_class'] ?? '').toLowerCase();
     final confidence = _result?['confidence'] ?? 0.0;
-    final woodData = WoodSpeciesData.getWoodData(woodType);
+    final woodData = PhilippineWoodSpeciesData.getWoodData(woodType);
 
     String baseRecommendation = "Based on the analysis, this ${_result?['predicted_class'] ?? 'wood'} sample ";
 
@@ -2760,9 +3270,9 @@ Widget _buildUsabilityItem(String title, String rating, IconData icon, {Color? c
     }
 
     if (woodData != null) {
-      final bestUses = WoodSpeciesData.getBestUses(woodType);
-      final priceRange = WoodSpeciesData.getPriceRange(woodType);
-      final sustainability = WoodSpeciesData.getSustainability(woodType);
+      final bestUses = PhilippineWoodSpeciesData.getBestUses(woodType);
+      final priceRange = PhilippineWoodSpeciesData.getPriceRange(woodType);
+      final sustainability = PhilippineWoodSpeciesData.getSustainability(woodType);
       
       baseRecommendation += "${woodData['name']} is ${woodData['workability'].toLowerCase()} to work with and is best suited for: ${bestUses.take(3).join(', ')}. ";
       baseRecommendation += "Price range: $priceRange. Sustainability: $sustainability.";

@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 
 // API
-const String kDefaultApiBase = 'http://10.0.2.2:5000';
+// For Android Emulator use: http://10.0.2.2:5000
+// For physical device/desktop use: http://localhost:5000 or http://YOUR_IP:5000
+const String kDefaultApiBase = 'http://localhost:5000';
 const Duration kApiTimeout = Duration(seconds: 12);
 
 // Compression
@@ -18,6 +20,20 @@ const String kPrefApiBase = 'api_base';
 const String kPrefConfidence = 'confidence_threshold';
 const String kPrefForceTest = 'force_test_mode';
 const String kPrefHistory = 'scan_history';
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
