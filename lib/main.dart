@@ -206,6 +206,10 @@ class _WoodScannerState extends State<WoodScanner>
   Future<void> scanWood() async {
     if (_image == null) return;
 
+    // Check if demo mode is enabled
+    final prefs = await SharedPreferences.getInstance();
+    final demoMode = prefs.getBool('demoMode') ?? false;
+
     // Start processing screen
     setState(() {
       _showProcessingScreen = true;
@@ -215,6 +219,12 @@ class _WoodScannerState extends State<WoodScanner>
 
     // Start processing animation
     await _startProcessingAnimation();
+
+    // If demo mode is enabled, use simulated scan
+    if (demoMode) {
+      await _simulateWoodScanDemo();
+      return;
+    }
 
     try {
       var request = http.MultipartRequest(
@@ -298,6 +308,58 @@ class _WoodScannerState extends State<WoodScanner>
       print("❌ ERROR connecting to backend: $e");
       _showErrorSnackBar("❌ Backend connection failed: $e\n\nMake sure your backend is running at http://localhost:5000");
     }
+  }
+
+  // Demo mode method with enhanced sample data
+  Future<void> _simulateWoodScanDemo() async {
+    // Philippine wood species with realistic confidence scores
+    final sampleWoodTypes = [
+      {'name': 'Narra', 'confidence': 0.92},
+      {'name': 'Mahogany', 'confidence': 0.88},
+      {'name': 'Acacia', 'confidence': 0.85},
+      {'name': 'Molave', 'confidence': 0.90},
+      {'name': 'Dao', 'confidence': 0.87},
+      {'name': 'Gmelina', 'confidence': 0.83},
+      {'name': 'Mango', 'confidence': 0.86},
+      {'name': 'Aratiles', 'confidence': 0.81},
+    ];
+    
+    final random = DateTime.now().millisecondsSinceEpoch % sampleWoodTypes.length;
+    final selectedWood = sampleWoodTypes[random];
+    
+    final simulatedData = {
+      'predicted_class': selectedWood['name'],
+      'confidence': selectedWood['confidence'],
+      'timestamp': DateTime.now().millisecondsSinceEpoch,
+      'demo_mode': true,
+    };
+
+    // Show "Done Scanning" message
+    setState(() {
+      _currentProcessingText = "Done scanning! ✅ (Demo Mode)";
+    });
+    
+    await Future.delayed(Duration(milliseconds: 1500));
+
+    // Hide processing screen and show usability check screen
+    setState(() {
+      _showProcessingScreen = false;
+      _result = simulatedData;
+      _showUsabilityScreen = true;
+      _isProcessing = false;
+    });
+
+    await saveScanHistory(simulatedData, _image!.path);
+    
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text("🎭 Demo Mode: Simulated ${selectedWood['name']} detection with ${((selectedWood['confidence'] as double) * 100).toStringAsFixed(1)}% confidence"),
+        backgroundColor: Color(0xFF6C5CE7),
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        duration: Duration(seconds: 3),
+      ),
+    );
   }
 
   // Test method to simulate wood scanning with sample data
@@ -3429,6 +3491,11 @@ _buildWoodTypesSection(),
 
 SizedBox(height: 30),
 
+// Good vs Bad Wood Reference Section
+_buildGoodVsBadWoodSection(),
+
+SizedBox(height: 30),
+
 // Quality Assessment Tips
 _buildTipsSection(),
 ],
@@ -3682,6 +3749,321 @@ style: TextStyle(
 fontSize: 11,
 color: color,
 fontWeight: FontWeight.w600,
+),
+),
+],
+),
+),
+],
+),
+);
+}
+
+Widget _buildGoodVsBadWoodSection() {
+return Column(
+crossAxisAlignment: CrossAxisAlignment.start,
+children: [
+Row(
+children: [
+Icon(Icons.compare_arrows_rounded, color: Color(0xFF6C5CE7), size: 24),
+SizedBox(width: 12),
+Text(
+"Good vs Bad Wood Reference",
+style: TextStyle(
+fontSize: 18,
+fontWeight: FontWeight.w700,
+color: Color(0xFF2D3436),
+),
+),
+],
+),
+SizedBox(height: 16),
+
+// Good Wood Section
+Container(
+padding: EdgeInsets.all(20),
+decoration: BoxDecoration(
+gradient: LinearGradient(
+begin: Alignment.topLeft,
+end: Alignment.bottomRight,
+colors: [
+Color(0xFF00B894).withOpacity(0.1),
+Color(0xFF00D2A7).withOpacity(0.05),
+],
+),
+borderRadius: BorderRadius.circular(16),
+border: Border.all(
+color: Color(0xFF00B894).withOpacity(0.3),
+width: 2,
+),
+),
+child: Column(
+crossAxisAlignment: CrossAxisAlignment.start,
+children: [
+Row(
+children: [
+Container(
+padding: EdgeInsets.all(10),
+decoration: BoxDecoration(
+color: Color(0xFF00B894),
+borderRadius: BorderRadius.circular(10),
+),
+child: Icon(
+Icons.thumb_up_rounded,
+color: Colors.white,
+size: 24,
+),
+),
+SizedBox(width: 12),
+Text(
+"GOOD WOOD Characteristics",
+style: TextStyle(
+fontSize: 16,
+fontWeight: FontWeight.w800,
+color: Color(0xFF00B894),
+letterSpacing: 0.5,
+),
+),
+],
+),
+SizedBox(height: 16),
+_buildCharacteristicItem(
+"✓ Straight & Consistent Grain",
+"Uniform grain pattern running parallel to the length",
+Color(0xFF00B894),
+true,
+),
+_buildCharacteristicItem(
+"✓ Proper Moisture Content",
+"6-12% moisture level, properly dried and seasoned",
+Color(0xFF00B894),
+true,
+),
+_buildCharacteristicItem(
+"✓ Minimal Defects",
+"Few or no knots, cracks, splits, or warping",
+Color(0xFF00B894),
+true,
+),
+_buildCharacteristicItem(
+"✓ Uniform Color",
+"Consistent coloring throughout without dark stains",
+Color(0xFF00B894),
+true,
+),
+_buildCharacteristicItem(
+"✓ High Density",
+"Feels solid and heavy for its size, indicating strength",
+Color(0xFF00B894),
+true,
+),
+_buildCharacteristicItem(
+"✓ Clean Surface",
+"No insect holes, fungal growth, or decay",
+Color(0xFF00B894),
+true,
+),
+_buildCharacteristicItem(
+"✓ Tight Growth Rings",
+"Close growth rings indicate slow growth and strength",
+Color(0xFF00B894),
+true,
+),
+],
+),
+),
+
+SizedBox(height: 16),
+
+// Bad Wood Section
+Container(
+padding: EdgeInsets.all(20),
+decoration: BoxDecoration(
+gradient: LinearGradient(
+begin: Alignment.topLeft,
+end: Alignment.bottomRight,
+colors: [
+Color(0xFFE17055).withOpacity(0.1),
+Color(0xFFFF6B6B).withOpacity(0.05),
+],
+),
+borderRadius: BorderRadius.circular(16),
+border: Border.all(
+color: Color(0xFFE17055).withOpacity(0.3),
+width: 2,
+),
+),
+child: Column(
+crossAxisAlignment: CrossAxisAlignment.start,
+children: [
+Row(
+children: [
+Container(
+padding: EdgeInsets.all(10),
+decoration: BoxDecoration(
+color: Color(0xFFE17055),
+borderRadius: BorderRadius.circular(10),
+),
+child: Icon(
+Icons.thumb_down_rounded,
+color: Colors.white,
+size: 24,
+),
+),
+SizedBox(width: 12),
+Text(
+"BAD WOOD Warning Signs",
+style: TextStyle(
+fontSize: 16,
+fontWeight: FontWeight.w800,
+color: Color(0xFFE17055),
+letterSpacing: 0.5,
+),
+),
+],
+),
+SizedBox(height: 16),
+_buildCharacteristicItem(
+"✗ Twisted or Irregular Grain",
+"Grain runs at angles or spirals, weakening structure",
+Color(0xFFE17055),
+false,
+),
+_buildCharacteristicItem(
+"✗ High Moisture Content",
+"Above 15% moisture, prone to warping and shrinking",
+Color(0xFFE17055),
+false,
+),
+_buildCharacteristicItem(
+"✗ Large Knots & Cracks",
+"Structural weak points that can split or break",
+Color(0xFFE17055),
+false,
+),
+_buildCharacteristicItem(
+"✗ Discoloration & Stains",
+"Dark patches indicating rot, mold, or water damage",
+Color(0xFFE17055),
+false,
+),
+_buildCharacteristicItem(
+"✗ Low Density",
+"Feels light and hollow, indicating weakness or decay",
+Color(0xFFE17055),
+false,
+),
+_buildCharacteristicItem(
+"✗ Insect Damage",
+"Small holes, tunnels, or sawdust indicating infestation",
+Color(0xFFE17055),
+false,
+),
+_buildCharacteristicItem(
+"✗ Warping or Bowing",
+"Bent, twisted, or cupped shape from improper drying",
+Color(0xFFE17055),
+false,
+),
+],
+),
+),
+
+SizedBox(height: 16),
+
+// Quick Reference Card
+Container(
+padding: EdgeInsets.all(20),
+decoration: BoxDecoration(
+color: Color(0xFF6C5CE7).withOpacity(0.1),
+borderRadius: BorderRadius.circular(16),
+border: Border.all(
+color: Color(0xFF6C5CE7).withOpacity(0.3),
+width: 1,
+),
+),
+child: Column(
+crossAxisAlignment: CrossAxisAlignment.start,
+children: [
+Row(
+children: [
+Icon(Icons.info_outline_rounded, color: Color(0xFF6C5CE7), size: 20),
+SizedBox(width: 8),
+Text(
+"Quick Reference Guide",
+style: TextStyle(
+fontSize: 14,
+fontWeight: FontWeight.w700,
+color: Color(0xFF2D3436),
+),
+),
+],
+),
+SizedBox(height: 12),
+Text(
+"When scanning wood with CLEARCUT, the AI analyzes these characteristics to determine quality. "
+"Good wood (75%+ confidence) shows most positive traits, while bad wood (below 75%) exhibits warning signs. "
+"Always verify critical applications with professional inspection.",
+style: TextStyle(
+fontSize: 12,
+color: Color(0xFF636E72),
+height: 1.5,
+),
+),
+],
+),
+),
+],
+);
+}
+
+Widget _buildCharacteristicItem(String title, String description, Color color, bool isGood) {
+return Container(
+margin: EdgeInsets.only(bottom: 12),
+padding: EdgeInsets.all(12),
+decoration: BoxDecoration(
+color: Colors.white,
+borderRadius: BorderRadius.circular(10),
+border: Border.all(
+color: color.withOpacity(0.2),
+width: 1,
+),
+),
+child: Row(
+crossAxisAlignment: CrossAxisAlignment.start,
+children: [
+Container(
+padding: EdgeInsets.all(6),
+decoration: BoxDecoration(
+color: color.withOpacity(0.1),
+borderRadius: BorderRadius.circular(6),
+),
+child: Icon(
+isGood ? Icons.check_circle_rounded : Icons.cancel_rounded,
+color: color,
+size: 18,
+),
+),
+SizedBox(width: 12),
+Expanded(
+child: Column(
+crossAxisAlignment: CrossAxisAlignment.start,
+children: [
+Text(
+title,
+style: TextStyle(
+fontSize: 13,
+fontWeight: FontWeight.w700,
+color: Color(0xFF2D3436),
+),
+),
+SizedBox(height: 4),
+Text(
+description,
+style: TextStyle(
+fontSize: 11,
+color: Color(0xFF636E72),
+height: 1.3,
 ),
 ),
 ],

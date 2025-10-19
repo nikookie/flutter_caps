@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+// import 'about_screen.dart';
 
 class SettingsScreen extends StatefulWidget {
   @override
@@ -12,6 +13,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   bool _autoSaveScans = true;
   bool _highQualityImages = true;
   bool _darkMode = false;
+  bool _demoMode = false;
   String _selectedLanguage = 'English';
   double _confidenceThreshold = 0.7;
 
@@ -28,6 +30,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
       _autoSaveScans = prefs.getBool('autoSave') ?? true;
       _highQualityImages = prefs.getBool('highQuality') ?? true;
       _darkMode = prefs.getBool('darkMode') ?? false;
+      _demoMode = prefs.getBool('demoMode') ?? false;
       _selectedLanguage = prefs.getString('language') ?? 'English';
       _confidenceThreshold = prefs.getDouble('confidenceThreshold') ?? 0.7;
     });
@@ -169,6 +172,31 @@ class _SettingsScreenState extends State<SettingsScreen> {
             // Scanning Settings Section
             _buildSectionHeader('Scanning'),
             _buildSettingCard(
+              icon: FontAwesomeIcons.flask,
+              iconColor: Color(0xFF6C5CE7),
+              title: 'Demo Mode',
+              subtitle: _demoMode ? 'Using sample data (No backend needed)' : 'Connect to backend for real scans',
+              trailing: Switch(
+                value: _demoMode,
+                onChanged: (value) {
+                  setState(() => _demoMode = value);
+                  _saveSetting('demoMode', value);
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(value 
+                        ? '🎭 Demo Mode ON - Using sample data' 
+                        : '🌐 Demo Mode OFF - Using real backend'),
+                      backgroundColor: value ? Color(0xFF6C5CE7) : Color(0xFF00B894),
+                      behavior: SnackBarBehavior.floating,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      duration: Duration(seconds: 2),
+                    ),
+                  );
+                },
+                activeColor: Color(0xFF6C5CE7),
+              ),
+            ),
+            _buildSettingCard(
               icon: FontAwesomeIcons.image,
               iconColor: Color(0xFFFFB74D),
               title: 'High Quality Images',
@@ -269,6 +297,20 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
             // About Section
             _buildSectionHeader('About'),
+            // Temporarily disabled - About screen
+            // _buildSettingCard(
+            //   icon: FontAwesomeIcons.infoCircle,
+            //   iconColor: Color(0xFF00B894),
+            //   title: 'About CLEARCUT',
+            //   subtitle: 'Model info, dataset, and methodology',
+            //   trailing: Icon(Icons.chevron_right, color: Color(0xFF636E72)),
+            //   onTap: () {
+            //     Navigator.push(
+            //       context,
+            //       MaterialPageRoute(builder: (context) => const AboutScreen()),
+            //     );
+            //   },
+            // ),
             _buildSettingCard(
               icon: FontAwesomeIcons.circleInfo,
               iconColor: Color(0xFF6C5CE7),
