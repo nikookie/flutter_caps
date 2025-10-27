@@ -12,6 +12,153 @@ import 'history_screen.dart';
 import 'philippine_wood_species_data.dart';
 import 'settings_screen.dart';
 
+// Wood Species Detail Screen
+class WoodSpeciesDetailScreen extends StatefulWidget {
+  final String woodType;
+  const WoodSpeciesDetailScreen({Key? key, required this.woodType}) : super(key: key);
+  @override
+  State<WoodSpeciesDetailScreen> createState() => _WoodSpeciesDetailScreenState();
+}
+
+class _WoodSpeciesDetailScreenState extends State<WoodSpeciesDetailScreen> with SingleTickerProviderStateMixin {
+  late AnimationController _animController;
+  late Animation<double> _fadeAnim;
+  late Animation<Offset> _slideAnim;
+
+  @override
+  void initState() {
+    super.initState();
+    _animController = AnimationController(vsync: this, duration: Duration(milliseconds: 600));
+    _fadeAnim = CurvedAnimation(parent: _animController, curve: Curves.easeInOut);
+    _slideAnim = Tween<Offset>(begin: Offset(0, 0.2), end: Offset.zero).animate(CurvedAnimation(parent: _animController, curve: Curves.easeOutCubic));
+    _animController.forward();
+  }
+
+  @override
+  void dispose() {
+    _animController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final woodData = PhilippineWoodSpeciesData.getWoodData(widget.woodType);
+    final detailedDescription = PhilippineWoodSpeciesData.getDetailedDescription(widget.woodType);
+    final superstition = PhilippineWoodSpeciesData.getSuperstition(widget.woodType);
+
+    if (woodData == null) {
+      return Scaffold(appBar: AppBar(title: Text('Wood Species'), backgroundColor: Color(0xFF00B894)), body: Center(child: Text('Wood species not found')));
+    }
+
+    return Scaffold(
+      backgroundColor: Color(0xFFF8F9FA),
+      body: SafeArea(
+        child: SingleChildScrollView(
+          child: Column(
+            children: [
+              Container(
+                padding: EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    GestureDetector(
+                      onTap: () => Navigator.pop(context),
+                      child: Container(
+                        padding: EdgeInsets.all(8),
+                        decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(12), boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10, offset: Offset(0, 2))]),
+                        child: Icon(Icons.arrow_back, color: Color(0xFF636E72), size: 24),
+                      ),
+                    ),
+                    Text('WOOD SPECIES INFO', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800, letterSpacing: 1.0, color: Color(0xFF2D3436))),
+                    SizedBox(width: 40),
+                  ],
+                ),
+              ),
+              FadeTransition(
+                opacity: _fadeAnim,
+                child: SlideTransition(
+                  position: _slideAnim,
+                  child: Container(
+                    margin: EdgeInsets.symmetric(horizontal: 24),
+                    padding: EdgeInsets.all(24),
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(begin: Alignment.topLeft, end: Alignment.bottomRight, colors: [Color(0xFF8B4513), Color(0xFFA0522D), Color(0xFF8B4513).withOpacity(0.8)]),
+                      borderRadius: BorderRadius.circular(20),
+                      boxShadow: [BoxShadow(color: Color(0xFF8B4513).withOpacity(0.3), blurRadius: 15, offset: Offset(0, 5))],
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Container(padding: EdgeInsets.all(14), decoration: BoxDecoration(color: Colors.white.withOpacity(0.2), borderRadius: BorderRadius.circular(12), border: Border.all(color: Colors.white.withOpacity(0.3), width: 2)), child: Icon(Icons.park_rounded, color: Colors.white, size: 36)),
+                            SizedBox(width: 16),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(woodData['name'].toString().toUpperCase(), style: TextStyle(fontSize: 28, fontWeight: FontWeight.w900, color: Colors.white, letterSpacing: 1.2)),
+                                  SizedBox(height: 4),
+                                  Text(woodData['scientificName'] ?? '', style: TextStyle(fontSize: 12, color: Colors.white.withOpacity(0.9), fontStyle: FontStyle.italic)),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                        SizedBox(height: 16),
+                        Container(padding: EdgeInsets.all(12), decoration: BoxDecoration(color: Colors.white.withOpacity(0.1), borderRadius: BorderRadius.circular(8), border: Border.all(color: Colors.white.withOpacity(0.2), width: 1)), child: Text(woodData['type'] ?? 'Unknown', style: TextStyle(fontSize: 14, color: Colors.white, fontWeight: FontWeight.w600))),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+              SizedBox(height: 30),
+              Container(
+                margin: EdgeInsets.symmetric(horizontal: 24),
+                padding: EdgeInsets.all(20),
+                decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(16), boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.08), blurRadius: 15, offset: Offset(0, 4))]),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(children: [Icon(Icons.description_rounded, color: Color(0xFF74B9FF), size: 24), SizedBox(width: 12), Text('About This Wood', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: Color(0xFF2D3436)))]),
+                    SizedBox(height: 16),
+                    _buildRichText(detailedDescription),
+                  ],
+                ),
+              ),
+              SizedBox(height: 24),
+              if (superstition.isNotEmpty && superstition != 'No superstitious beliefs recorded for this wood type.')
+                Container(
+                  margin: EdgeInsets.symmetric(horizontal: 24),
+                  padding: EdgeInsets.all(20),
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(begin: Alignment.topLeft, end: Alignment.bottomRight, colors: [Color(0xFF6C5CE7).withOpacity(0.1), Color(0xFFA29BFE).withOpacity(0.1)]),
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(color: Color(0xFF6C5CE7).withOpacity(0.3), width: 1.5),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(children: [Icon(Icons.auto_awesome_rounded, color: Color(0xFF6C5CE7), size: 24), SizedBox(width: 12), Text('Philippine Beliefs & Superstitions', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: Color(0xFF2D3436)))]),
+                      SizedBox(height: 16),
+                      Container(padding: EdgeInsets.all(16), decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(12), border: Border.all(color: Color(0xFF6C5CE7).withOpacity(0.2), width: 1)), child: _buildRichText(superstition)),
+                    ],
+                  ),
+                ),
+              SizedBox(height: 30),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildRichText(String text) {
+    final parts = text.split(RegExp(r'\*\*'));
+    return RichText(text: TextSpan(children: List.generate(parts.length, (index) { final isBold = index % 2 == 1; return TextSpan(text: parts[index], style: TextStyle(fontSize: 14, color: Color(0xFF636E72), fontWeight: isBold ? FontWeight.w700 : FontWeight.w500, height: 1.6)); })));
+  }
+}
+
 class SplashScreen extends StatefulWidget {
   @override
   State<SplashScreen> createState() => _SplashScreenState();
@@ -1354,96 +1501,313 @@ class _WoodScannerState extends State<WoodScanner>
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // PRIMARY: Wood Species Display (Most Prominent)
-          Container(
-            width: double.infinity,
-            padding: EdgeInsets.all(20),
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [
-                  Color(0xFF8B4513),
-                  Color(0xFFA0522D),
-                  Color(0xFF8B4513).withOpacity(0.8),
+          // PRIMARY: Wood Species Display (Most Prominent) - CLICKABLE
+          GestureDetector(
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => WoodSpeciesDetailScreen(woodType: woodType),
+                ),
+              );
+            },
+            child: Container(
+              width: double.infinity,
+              padding: EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [
+                    Color(0xFF8B4513),
+                    Color(0xFFA0522D),
+                    Color(0xFF8B4513).withOpacity(0.8),
+                  ],
+                ),
+                borderRadius: BorderRadius.circular(16),
+                boxShadow: [
+                  BoxShadow(
+                    color: Color(0xFF8B4513).withOpacity(0.3),
+                    blurRadius: 15,
+                    offset: Offset(0, 5),
+                  ),
                 ],
               ),
-              borderRadius: BorderRadius.circular(16),
-              boxShadow: [
-                BoxShadow(
-                  color: Color(0xFF8B4513).withOpacity(0.3),
-                  blurRadius: 15,
-                  offset: Offset(0, 5),
-                ),
-              ],
-            ),
-            child: Row(
-              children: [
-                // Wood icon with background
-                Container(
-                  padding: EdgeInsets.all(14),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.2),
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: Colors.white.withOpacity(0.3), width: 2),
+              child: Row(
+                children: [
+                  // Wood icon with background
+                  Container(
+                    padding: EdgeInsets.all(14),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.2),
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: Colors.white.withOpacity(0.3), width: 2),
+                    ),
+                    child: Icon(
+                      Icons.park_rounded,
+                      color: Colors.white,
+                      size: 36,
+                    ),
                   ),
-                  child: Icon(
-                    Icons.park_rounded,
-                    color: Colors.white,
-                    size: 36,
-                  ),
-                ),
-                SizedBox(width: 16),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          Text(
-                            "Wood Species Detected",
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: Colors.white.withOpacity(0.9),
-                              fontWeight: FontWeight.w600,
-                              letterSpacing: 0.5,
+                  SizedBox(width: 16),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Text(
+                              "Wood Species Detected",
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: Colors.white.withOpacity(0.9),
+                                fontWeight: FontWeight.w600,
+                                letterSpacing: 0.5,
+                              ),
                             ),
-                          ),
-                          SizedBox(width: 6),
-                          Icon(
-                            Icons.verified_rounded,
+                            SizedBox(width: 6),
+                            Icon(
+                              Icons.verified_rounded,
+                              color: Colors.white,
+                              size: 16,
+                            ),
+                          ],
+                        ),
+                        SizedBox(height: 6),
+                        Text(
+                          woodType.toUpperCase(),
+                          style: TextStyle(
+                            fontSize: 26,
+                            fontWeight: FontWeight.w900,
                             color: Colors.white,
-                            size: 16,
+                            letterSpacing: 1.2,
+                            height: 1.1,
                           ),
-                        ],
-                      ),
-                      SizedBox(height: 6),
-                      Text(
-                        woodType.toUpperCase(),
-                        style: TextStyle(
-                          fontSize: 26,
-                          fontWeight: FontWeight.w900,
-                          color: Colors.white,
-                          letterSpacing: 1.2,
-                          height: 1.1,
+                        ),
+                        SizedBox(height: 4),
+                        Text(
+                          _getWoodSpeciesInfo(),
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: Colors.white.withOpacity(0.95),
+                            fontWeight: FontWeight.w500,
+                            height: 1.3,
+                          ),
+                        ),
+                        SizedBox(height: 8),
+                        Row(
+                          children: [
+                            Icon(
+                              Icons.info_outline_rounded,
+                              color: Colors.white.withOpacity(0.7),
+                              size: 14,
+                            ),
+                            SizedBox(width: 4),
+                            Text(
+                              "Tap to view details",
+                              style: TextStyle(
+                                fontSize: 11,
+                                color: Colors.white.withOpacity(0.7),
+                                fontStyle: FontStyle.italic,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          SizedBox(height: 20),
+
+          // PROTECTED SPECIES ALERT SYSTEM
+          if (PhilippineWoodSpeciesData.isProtectedSpecies(woodType))
+            Container(
+              padding: EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [
+                    PhilippineWoodSpeciesData.getProtectionStatusColor(woodType).withOpacity(0.15),
+                    PhilippineWoodSpeciesData.getProtectionStatusColor(woodType).withOpacity(0.05),
+                  ],
+                ),
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(
+                  color: PhilippineWoodSpeciesData.getProtectionStatusColor(woodType),
+                  width: 2,
+                ),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Alert Header
+                  Row(
+                    children: [
+                      Container(
+                        padding: EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: PhilippineWoodSpeciesData.getProtectionStatusColor(woodType).withOpacity(0.2),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: Icon(
+                          Icons.warning_amber_rounded,
+                          color: PhilippineWoodSpeciesData.getProtectionStatusColor(woodType),
+                          size: 28,
                         ),
                       ),
-                      SizedBox(height: 4),
-                      Text(
-                        _getWoodSpeciesInfo(),
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: Colors.white.withOpacity(0.95),
-                          fontWeight: FontWeight.w500,
-                          height: 1.3,
+                      SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'PROTECTED SPECIES ALERT',
+                              style: TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w800,
+                                color: PhilippineWoodSpeciesData.getProtectionStatusColor(woodType),
+                                letterSpacing: 0.5,
+                              ),
+                            ),
+                            SizedBox(height: 4),
+                            Text(
+                              PhilippineWoodSpeciesData.getProtectionStatus(woodType),
+                              style: TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w600,
+                                color: Color(0xFF636E72),
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                     ],
                   ),
-                ),
-              ],
+                  SizedBox(height: 16),
+
+                  // Legal Implications
+                  Container(
+                    padding: EdgeInsets.all(14),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(
+                        color: PhilippineWoodSpeciesData.getProtectionStatusColor(woodType).withOpacity(0.2),
+                        width: 1,
+                      ),
+                    ),
+                    child: Text(
+                      PhilippineWoodSpeciesData.getLegalImplications(woodType),
+                      style: TextStyle(
+                        fontSize: 13,
+                        color: Color(0xFF2D3436),
+                        fontWeight: FontWeight.w500,
+                        height: 1.5,
+                      ),
+                    ),
+                  ),
+                  SizedBox(height: 16),
+
+                  // Sustainable Alternatives
+                  if (PhilippineWoodSpeciesData.getSustainableAlternatives(woodType).isNotEmpty)
+                    Container(
+                      padding: EdgeInsets.all(14),
+                      decoration: BoxDecoration(
+                        color: Color(0xFF00B894).withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                          color: Color(0xFF00B894),
+                          width: 1.5,
+                        ),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Icon(
+                                Icons.eco_rounded,
+                                color: Color(0xFF00B894),
+                                size: 20,
+                              ),
+                              SizedBox(width: 8),
+                              Text(
+                                'SUSTAINABLE ALTERNATIVES',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w800,
+                                  color: Color(0xFF00B894),
+                                  letterSpacing: 0.5,
+                                ),
+                              ),
+                            ],
+                          ),
+                          SizedBox(height: 10),
+                          ...PhilippineWoodSpeciesData.getSustainableAlternatives(woodType).map((alt) {
+                            return Padding(
+                              padding: EdgeInsets.only(bottom: 6),
+                              child: Row(
+                                children: [
+                                  Icon(
+                                    Icons.check_circle_rounded,
+                                    color: Color(0xFF00B894),
+                                    size: 16,
+                                  ),
+                                  SizedBox(width: 8),
+                                  Text(
+                                    alt,
+                                    style: TextStyle(
+                                      fontSize: 13,
+                                      color: Color(0xFF2D3436),
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            );
+                          }).toList(),
+                        ],
+                      ),
+                    ),
+                  SizedBox(height: 12),
+
+                  // Conservation Message
+                  if (PhilippineWoodSpeciesData.getConservationMessage(woodType).isNotEmpty)
+                    Container(
+                      padding: EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: Color(0xFF6C5CE7).withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: Row(
+                        children: [
+                          Icon(
+                            Icons.favorite_rounded,
+                            color: Color(0xFF6C5CE7),
+                            size: 18,
+                          ),
+                          SizedBox(width: 10),
+                          Expanded(
+                            child: Text(
+                              PhilippineWoodSpeciesData.getConservationMessage(woodType),
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: Color(0xFF2D3436),
+                                fontWeight: FontWeight.w500,
+                                height: 1.4,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                ],
+              ),
             ),
-          ),
           SizedBox(height: 20),
 
           // SECONDARY: Wood Quality Indicator (Smaller, less prominent)
@@ -1991,13 +2355,24 @@ class _WoodScannerState extends State<WoodScanner>
 
                 SizedBox(height: 30),
 
-                // Wood Type Card with enhanced icon
-                _buildSummaryCard(
-                  title: "🌳 Wood Species",
-                  value: _result?['predicted_class'] ?? 'Unknown',
-                  icon: Icons.nature_rounded,
-                  color: Color(0xFF8B4513), // Wood brown color
-                  subtitle: _getWoodSpeciesInfo(),
+                // Wood Type Card with enhanced icon - CLICKABLE
+                GestureDetector(
+                  onTap: () {
+                    final woodType = _result?['predicted_class'] ?? 'Unknown';
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => WoodSpeciesDetailScreen(woodType: woodType),
+                      ),
+                    );
+                  },
+                  child: _buildSummaryCard(
+                    title: "🌳 Wood Species",
+                    value: _result?['predicted_class'] ?? 'Unknown',
+                    icon: Icons.nature_rounded,
+                    color: Color(0xFF8B4513), // Wood brown color
+                    subtitle: _getWoodSpeciesInfo(),
+                  ),
                 ),
 
                 SizedBox(height: 16),
