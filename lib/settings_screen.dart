@@ -16,6 +16,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   bool _demoMode = false;
   String _selectedLanguage = 'English';
   double _confidenceThreshold = 0.7;
+  String _apiBase = 'http://localhost:5000';
 
   @override
   void initState() {
@@ -33,6 +34,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
       _demoMode = prefs.getBool('demoMode') ?? false;
       _selectedLanguage = prefs.getString('language') ?? 'English';
       _confidenceThreshold = prefs.getDouble('confidenceThreshold') ?? 0.7;
+      _apiBase = prefs.getString('api_base') ?? 'http://localhost:5000';
     });
   }
 
@@ -195,6 +197,22 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 },
                 activeColor: Color(0xFF6C5CE7),
               ),
+            ),
+            _buildSettingCard(
+              icon: FontAwesomeIcons.wifi,
+              iconColor: Color(0xFF00B894),
+              title: 'Network Selection',
+              subtitle: 'Choose your backend network',
+              trailing: Icon(Icons.chevron_right, color: Color(0xFF636E72)),
+              onTap: () => _showNetworkSelectionDialog(),
+            ),
+            _buildSettingCard(
+              icon: FontAwesomeIcons.server,
+              iconColor: Color(0xFF74B9FF),
+              title: 'Backend Server URL',
+              subtitle: _apiBase,
+              trailing: Icon(Icons.chevron_right, color: Color(0xFF636E72)),
+              onTap: () => _showApiBaseDialog(),
             ),
             _buildSettingCard(
               icon: FontAwesomeIcons.image,
@@ -514,6 +532,265 @@ class _SettingsScreenState extends State<SettingsScreen> {
               },
             );
           }).toList(),
+        ),
+      ),
+    );
+  }
+
+  void _showApiBaseDialog() {
+    final controller = TextEditingController(text: _apiBase);
+    
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: Row(
+          children: [
+            Icon(FontAwesomeIcons.server, color: Color(0xFF74B9FF), size: 24),
+            SizedBox(width: 12),
+            Text(
+              'Backend Server URL',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
+            ),
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Enter your backend server address:',
+              style: TextStyle(fontSize: 13, color: Color(0xFF636E72), fontWeight: FontWeight.w500),
+            ),
+            SizedBox(height: 12),
+            TextField(
+              controller: controller,
+              decoration: InputDecoration(
+                hintText: 'http://192.168.1.100:5000',
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+              ),
+            ),
+            SizedBox(height: 12),
+            Container(
+              padding: EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Color(0xFF74B9FF).withOpacity(0.1),
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: Color(0xFF74B9FF).withOpacity(0.3)),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    '���� Tips:',
+                    style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: Color(0xFF74B9FF)),
+                  ),
+                  SizedBox(height: 6),
+                  Text(
+                    '• Same WiFi: Use your backend IP (e.g., http://192.168.1.100:5000)\n• Mobile network: Use public IP or domain\n• Localhost: Only works on same device',
+                    style: TextStyle(fontSize: 11, color: Color(0xFF636E72), height: 1.4),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text('Cancel', style: TextStyle(color: Color(0xFF636E72))),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              final newUrl = controller.text.trim();
+              if (newUrl.isNotEmpty) {
+                setState(() => _apiBase = newUrl);
+                _saveSetting('api_base', newUrl);
+                Navigator.pop(context);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text('✅ Backend URL updated to: $newUrl'),
+                    backgroundColor: Color(0xFF00B894),
+                    behavior: SnackBarBehavior.floating,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    duration: Duration(seconds: 2),
+                  ),
+                );
+              }
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Color(0xFF74B9FF),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+            ),
+            child: Text('Save'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showNetworkSelectionDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: Row(
+          children: [
+            Icon(FontAwesomeIcons.wifi, color: Color(0xFF00B894), size: 24),
+            SizedBox(width: 12),
+            Text(
+              'Select Network',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
+            ),
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // Option 1: Same WiFi Network
+            Container(
+              margin: EdgeInsets.only(bottom: 12),
+              padding: EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Color(0xFF00B894).withOpacity(0.1),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: Color(0xFF00B894), width: 2),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Icon(FontAwesomeIcons.wifi, color: Color(0xFF00B894), size: 20),
+                      SizedBox(width: 12),
+                      Text(
+                        'Same WiFi Network',
+                        style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: Color(0xFF2D3436)),
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: 8),
+                  Text(
+                    'Use this when phone and backend are on the same WiFi',
+                    style: TextStyle(fontSize: 12, color: Color(0xFF636E72), height: 1.4),
+                  ),
+                  SizedBox(height: 12),
+                  Container(
+                    padding: EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(color: Color(0xFFE2E8F0)),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('IP: 192.168.254.112', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Color(0xFF2D3436))),
+                        Text('Port: 5000', style: TextStyle(fontSize: 12, color: Color(0xFF636E72))),
+                      ],
+                    ),
+                  ),
+                  SizedBox(height: 12),
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: () {
+                        setState(() => _apiBase = 'http://192.168.254.112:5000');
+                        _saveSetting('api_base', 'http://192.168.254.112:5000');
+                        Navigator.pop(context);
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text('✅ Connected to Same WiFi Network (192.168.254.112:5000)'),
+                            backgroundColor: Color(0xFF00B894),
+                            behavior: SnackBarBehavior.floating,
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                            duration: Duration(seconds: 2),
+                          ),
+                        );
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Color(0xFF00B894),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                      ),
+                      child: Text('Use This Network', style: TextStyle(fontWeight: FontWeight.w600)),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            
+            // Option 2: Mobile Network
+            Container(
+              padding: EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Color(0xFF74B9FF).withOpacity(0.1),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: Color(0xFF74B9FF), width: 2),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Icon(FontAwesomeIcons.mobileScreen, color: Color(0xFF74B9FF), size: 20),
+                      SizedBox(width: 12),
+                      Text(
+                        'Mobile Network',
+                        style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: Color(0xFF2D3436)),
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: 8),
+                  Text(
+                    'Use this when phone is on mobile data (4G/5G)',
+                    style: TextStyle(fontSize: 12, color: Color(0xFF636E72), height: 1.4),
+                  ),
+                  SizedBox(height: 12),
+                  Container(
+                    padding: EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(color: Color(0xFFE2E8F0)),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('IP: 10.202.245.221', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Color(0xFF2D3436))),
+                        Text('Port: 5000', style: TextStyle(fontSize: 12, color: Color(0xFF636E72))),
+                      ],
+                    ),
+                  ),
+                  SizedBox(height: 12),
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: () {
+                        setState(() => _apiBase = 'http://10.202.245.221:5000');
+                        _saveSetting('api_base', 'http://10.202.245.221:5000');
+                        Navigator.pop(context);
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text('✅ Connected to Mobile Network (10.202.245.221:5000)'),
+                            backgroundColor: Color(0xFF74B9FF),
+                            behavior: SnackBarBehavior.floating,
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                            duration: Duration(seconds: 2),
+                          ),
+                        );
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Color(0xFF74B9FF),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                      ),
+                      child: Text('Use This Network', style: TextStyle(fontWeight: FontWeight.w600)),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
         ),
       ),
     );

@@ -241,7 +241,24 @@ class PhilippineWoodSpeciesData {
       ],
       'priceRange': 'Extremely High',
       'sustainability': 'Endangered - very limited availability',
-      'localNames': ['Kamagong', 'Mabolo', 'Bolongeta']
+      'localNames': ['Kamagong', 'Mabolo', 'Bolongeta'],
+      'detailedDescription': 'The **Kamagong tree**, scientifically known as **Diospyros blancoi**, is the Philippine ebony and one of the most prized hardwoods in the world. This magnificent tree can reach heights of up to **25 meters (82 feet)** and is characterized by its **dark gray to black trunk** with rough, irregular fissures. The wood displays a stunning **dark brown to almost black** color that becomes even more lustrous when polished.\n\n**Cultural & Superstitious Beliefs:**\nIn Philippine folklore, Kamagong is considered a symbol of **wealth, prestige, and spiritual power**. It is believed that Kamagong wood brings **prosperity and good fortune** to those who possess it. The wood is traditionally used in **royal furniture** and **important ceremonial items**, and is thought to attract **success and recognition**. According to local beliefs, Kamagong should **only be used for special occasions** and **important pieces**, as it is believed to carry **powerful spiritual energy**. The wood is highly respected and is often used in **ancestral heirlooms** to preserve **family legacy and honor**.',
+      'superstition': 'Symbol of wealth and prestige. Brings prosperity and good fortune. Carries powerful spiritual energy. Use only for special occasions and important pieces. Preserves family legacy and honor.',
+      'folklore': '**The Black Gold Legend**: In Tagalog mythology, Kamagong is known as the "Black Gold of the Forest." It is believed that ancient Filipino royalty used Kamagong for their thrones and ceremonial items. The wood is said to **absorb the wisdom of ancestors** and pass it to future generations.\n\n**Spiritual Protection**: Kamagong is traditionally carved into protective amulets and talismans. Warriors and leaders are believed to gain **strength and authority** by carrying Kamagong items.',
+      'regionalVariations': {
+        'Tagalog': 'Black Gold - used for royal furniture and ancestral heirlooms',
+        'Visayan': 'Sacred wood for important ceremonies and spiritual rituals',
+        'Ilocano': 'Symbol of family wealth and prestige; passed down through generations',
+        'Mindanao': 'Tribal treasure wood - used for important leader items'
+      },
+      'traditionalUses': [
+        'Royal furniture and thrones',
+        'Ceremonial items and altars',
+        'Protective amulets and talismans',
+        'Ancestral heirloom pieces',
+        'Important leader items',
+        'Sacred ritual objects'
+      ]
     },
     
     'ipil': {
@@ -287,7 +304,9 @@ class PhilippineWoodSpeciesData {
       ],
       'priceRange': 'High',
       'sustainability': 'Vulnerable - use sustainably sourced',
-      'localNames': ['Ipil', 'Merbau', 'Kwila']
+      'localNames': ['Ipil', 'Merbau', 'Kwila'],
+      'detailedDescription': 'The **Ipil tree**, scientifically known as **Intsia bijuga**, is a highly valued hardwood native to the Philippines and Southeast Asia. This magnificent tree can reach heights of up to **40 meters (131 feet)** and is characterized by its **gray-brown trunk** with rough, vertical ridges. The wood displays a beautiful **yellowish-brown to dark brown** color that becomes richer with age and weathering.\n\n**Cultural & Superstitious Beliefs:**\nIn Philippine maritime culture, Ipil is considered a symbol of **protection and safe passage**. It is believed that Ipil wood brings **safety and security** to those who travel by sea. The wood is traditionally used in **boat building** and is thought to protect sailors from **storms and dangers**. According to local beliefs, Ipil furniture brings **stability and grounding** to the home. The wood is highly respected in coastal communities and is often used in **important structures** to ensure **longevity and protection**.',
+      'superstition': 'Symbol of protection and safe passage. Brings safety and security. Protects sailors from storms. Brings stability and grounding to the home.'
     },
     
     // PLANTATION & COMMON SPECIES

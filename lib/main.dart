@@ -11,6 +11,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'history_screen.dart';
 import 'philippine_wood_species_data.dart';
 import 'settings_screen.dart';
+import 'analytics_screen.dart';
 
 // Wood Species Detail Screen
 class WoodSpeciesDetailScreen extends StatefulWidget {
@@ -374,9 +375,13 @@ class _WoodScannerState extends State<WoodScanner>
     }
 
     try {
+      // Load the API base URL from SharedPreferences
+      final prefs = await SharedPreferences.getInstance();
+      final apiBase = prefs.getString('api_base') ?? 'http://localhost:5000';
+      
       var request = http.MultipartRequest(
         'POST',
-        Uri.parse("http://localhost:5000/predict"),
+        Uri.parse("$apiBase/predict"),
       );
 
       // Handle web vs mobile differently
@@ -474,11 +479,15 @@ class _WoodScannerState extends State<WoodScanner>
     final random = DateTime.now().millisecondsSinceEpoch % sampleWoodTypes.length;
     final selectedWood = sampleWoodTypes[random];
     
+    // Get wood data from Philippine wood species database
+    final woodData = PhilippineWoodSpeciesData.getWoodData(selectedWood['name'].toString());
+    
     final simulatedData = {
       'predicted_class': selectedWood['name'],
       'confidence': selectedWood['confidence'],
       'timestamp': DateTime.now().millisecondsSinceEpoch,
       'demo_mode': true,
+      'woodData': woodData, // Include wood data for demo mode
     };
 
     // Show "Done Scanning" message
@@ -954,6 +963,17 @@ class _WoodScannerState extends State<WoodScanner>
     return Column(
       children: [
         _buildMenuButton(
+          title: "ANALYTICS DASHBOARD",
+          icon: FontAwesomeIcons.chartLine,
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => AnalyticsScreen()),
+            );
+          },
+        ),
+        SizedBox(height: 16),
+        _buildMenuButton(
           title: "SCAN HISTORY",
           icon: FontAwesomeIcons.clockRotateLeft,
           onTap: () {
@@ -1272,11 +1292,11 @@ class _WoodScannerState extends State<WoodScanner>
                         },
                       ),
                       
-                      SizedBox(height: 60),
+                      SizedBox(height: 40),
                       
                       // Fun facts while processing
                       Container(
-                        padding: EdgeInsets.all(20),
+                        padding: EdgeInsets.all(16),
                         decoration: BoxDecoration(
                           color: Colors.white,
                           borderRadius: BorderRadius.circular(16),
@@ -1293,24 +1313,24 @@ class _WoodScannerState extends State<WoodScanner>
                             Icon(
                               Icons.lightbulb_outline,
                               color: Color(0xFF74B9FF),
-                              size: 32,
+                              size: 28,
                             ),
-                            SizedBox(height: 12),
+                            SizedBox(height: 8),
                             Text(
                               "Did you know?",
                               style: TextStyle(
-                                fontSize: 16,
+                                fontSize: 14,
                                 fontWeight: FontWeight.w700,
                                 color: Color(0xFF2D3436),
                               ),
                             ),
-                            SizedBox(height: 8),
+                            SizedBox(height: 6),
                             Text(
-                              "Wood grain patterns can reveal the age, growth conditions, and strength characteristics of the timber.",
+                              "Wood grain patterns reveal age, growth conditions, and strength.",
                               style: TextStyle(
-                                fontSize: 14,
+                                fontSize: 12,
                                 color: Color(0xFF636E72),
-                                height: 1.4,
+                                height: 1.3,
                               ),
                               textAlign: TextAlign.center,
                             ),
@@ -1332,145 +1352,149 @@ class _WoodScannerState extends State<WoodScanner>
     return Scaffold(
       backgroundColor: Color(0xFFF8F9FA),
       body: SafeArea(
-        child: SingleChildScrollView(
-          child: Column(
-            children: [
-              // Header
-              Container(
-                padding: EdgeInsets.symmetric(horizontal: 24, vertical: 20),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      "CHECK USABILITY",
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w800,
-                        letterSpacing: 1.2,
-                        color: Color(0xFF2D3436),
+        child: Column(
+          children: [
+            // Header
+            Container(
+              padding: EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    "CHECK USABILITY",
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w800,
+                      letterSpacing: 1.2,
+                      color: Color(0xFF2D3436),
+                    ),
+                  ),
+                  GestureDetector(
+                    onTap: () {
+                      setState(() {
+                        _showUsabilityScreen = false;
+                        _result = null;
+                      });
+                    },
+                    child: Container(
+                      padding: EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(12),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.05),
+                            blurRadius: 10,
+                            offset: Offset(0, 2),
+                          ),
+                        ],
+                      ),
+                      child: Icon(
+                        Icons.arrow_back,
+                        color: Color(0xFF636E72),
+                        size: 24,
                       ),
                     ),
-                    GestureDetector(
-                      onTap: () {
-                        setState(() {
-                          _showUsabilityScreen = false;
-                          _result = null;
-                        });
-                      },
-                      child: Container(
-                        padding: EdgeInsets.all(8),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(12),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withOpacity(0.05),
-                              blurRadius: 10,
-                              offset: Offset(0, 2),
-                            ),
-                          ],
-                        ),
-                        child: Icon(
-                          Icons.arrow_back,
-                          color: Color(0xFF636E72),
-                          size: 24,
-                        ),
-                      ),
+                  ),
+                ],
+              ),
+            ),
+
+            // Image preview
+            if (_image != null)
+              Container(
+                margin: EdgeInsets.symmetric(horizontal: 24),
+                height: 160,
+                width: double.infinity,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(16),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.1),
+                      blurRadius: 15,
+                      offset: Offset(0, 5),
                     ),
                   ],
                 ),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(16),
+                  child: kIsWeb
+                      ? Image.network(
+                          _image!.path,
+                          fit: BoxFit.cover,
+                          errorBuilder: (context, error, stackTrace) {
+                            return Container(
+                              width: double.infinity,
+                              height: double.infinity,
+                              color: Color(0xFFE2E8F0),
+                              child: Icon(
+                                Icons.image_outlined,
+                                size: 50,
+                                color: Color(0xFF636E72),
+                              ),
+                            );
+                          },
+                        )
+                      : Image.file(
+                          _image!,
+                          fit: BoxFit.cover,
+                        ),
+                ),
               ),
 
-              // Image preview
-              if (_image != null)
-                Container(
-                  margin: EdgeInsets.symmetric(horizontal: 24),
-                  height: 200,
-                  width: double.infinity,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(20),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.1),
-                        blurRadius: 15,
-                        offset: Offset(0, 5),
-                      ),
-                    ],
-                  ),
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(20),
-                    child: kIsWeb
-                        ? Image.network(
-                            _image!.path,
-                            fit: BoxFit.cover,
-                            errorBuilder: (context, error, stackTrace) {
-                              return Container(
-                                width: double.infinity,
-                                height: double.infinity,
-                                color: Color(0xFFE2E8F0),
-                                child: Icon(
-                                  Icons.image_outlined,
-                                  size: 50,
-                                  color: Color(0xFF636E72),
-                                ),
-                              );
-                            },
-                          )
-                        : Image.file(
-                            _image!,
-                            fit: BoxFit.cover,
+            SizedBox(height: 16),
+
+            // Results - Scrollable
+            Expanded(
+              child: SingleChildScrollView(
+                child: Container(
+                  margin: EdgeInsets.symmetric(horizontal: 16),
+                  child: _result != null
+                      ? FadeTransition(
+                          opacity: _fadeAnim,
+                          child: SlideTransition(
+                            position: _slideAnim,
+                            child: ScaleTransition(
+                              scale: _scaleAnim,
+                              child: _buildResultCard(),
+                            ),
                           ),
-                  ),
-                ),
-
-              SizedBox(height: 30),
-
-              // Results
-              if (_result != null)
-                FadeTransition(
-                  opacity: _fadeAnim,
-                  child: SlideTransition(
-                    position: _slideAnim,
-                    child: ScaleTransition(
-                      scale: _scaleAnim,
-                      child: _buildResultCard(),
-                    ),
-                  ),
-                ),
-
-              SizedBox(height: 30),
-
-              // Check Usability Button
-              Container(
-                margin: EdgeInsets.symmetric(horizontal: 24),
-                width: double.infinity,
-                child: ElevatedButton.icon(
-                  onPressed: checkUsability,
-                  icon: Icon(Icons.check_circle_outline, size: 24),
-                  label: Text(
-                    "CHECK USABILITY",
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w700,
-                      letterSpacing: 0.5,
-                    ),
-                  ),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Color(0xFF74B9FF),
-                    foregroundColor: Colors.white,
-                    padding: EdgeInsets.symmetric(vertical: 18),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                    elevation: 8,
-                    shadowColor: Color(0xFF74B9FF).withOpacity(0.3),
-                  ),
+                        )
+                      : SizedBox.shrink(),
                 ),
               ),
+            ),
 
-              SizedBox(height: 30),
-            ],
-          ),
+            SizedBox(height: 12),
+
+            // Check Usability Button
+            Container(
+              margin: EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+              width: double.infinity,
+              child: ElevatedButton.icon(
+                onPressed: checkUsability,
+                icon: Icon(Icons.check_circle_outline, size: 24),
+                label: Text(
+                  "CHECK USABILITY",
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: 0.5,
+                  ),
+                ),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Color(0xFF74B9FF),
+                  foregroundColor: Colors.white,
+                  padding: EdgeInsets.symmetric(vertical: 16),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  elevation: 8,
+                  shadowColor: Color(0xFF74B9FF).withOpacity(0.3),
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );
